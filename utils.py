@@ -17,7 +17,7 @@ import requests
 import joblib
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-from xgboost import XGBClassifier
+#from xgboost import XGBClassifier
 def predict_Link(data):
 
     #api porcesa y descarga informacion del link (tweets de el ultimo mes del usuario)
