@@ -146,7 +146,7 @@ with c2:
     mention(
         label="Follow me on Twitter",
         icon="twitter",
-        url="https://twitter.com/andfanilo",
+        url="https://www.linkedin.com/in/joel-de-andrade-175663152/",
     )
 
 with c3:
