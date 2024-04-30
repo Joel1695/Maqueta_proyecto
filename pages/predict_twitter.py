@@ -112,47 +112,18 @@ if st.button("Obtener datos y hacer predicción"):
         datos = obtener_datos_desde_api(enlace)
         
         # Verificar si se obtuvieron datos
-        if not datos.empty:
+        if datos is not None:
             # Hacer la predicción con el modelo
             resultado_prediccion = datos
             
             # Mostrar el resultado de la predicción
             st.write("Resultado de la predicción:")
-            st.write(resultado_prediccion)
+            st.write(f' la probabilidad de que este usuarion puede ser diagnosticado con algun transtorno es de un {resultado_prediccion*100}%')
+            st.warning("ALERTA!!! sin importar el resultado de la app le recomendamos que si tienen algun duda de si una persona puede o no tener algun desorden mental visite a un profecional para un correcto diagnostico")
         else:
             st.warning("No se pudieron obtener datos de la API")
     else:
         st.warning("Por favor ingrese un enlace válido")
 
-c1, c2, c3 = st.columns(3)
 
-with c1:
-    badge(type="pypi", name="streamlit-drawable-canvas")
-    badge(type="github", name="andfanilo/streamlit-echarts")
-    badge(type="streamlit", url="https://lottie.streamlit.app/")
-    badge(type="twitter", name="andfanilo")
-
-with c2:
-    mention(
-        label="My ECharts Demo!",
-        icon="streamlit",
-        url="https://echarts.streamlitapp.com",
-    )
-    mention(
-        label="ECharts Source Code",
-        icon="github",
-        url="https://github.com/andfanilo/streamlit-echarts",
-    )
-    mention(
-        label="Follow me on Twitter",
-        icon="twitter",
-        url="https://www.linkedin.com/in/joel-de-andrade-175663152/",
-    )
-
-with c3:
-    load_key_css()
-    st.write(
-        f"To check the Developer Tools: {key('CTRL+Maj+I', write=False)}",
-        unsafe_allow_html=True,
-    )
 

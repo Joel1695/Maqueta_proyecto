@@ -17,7 +17,7 @@ import requests
 import joblib
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-#from xgboost import XGBClassifier
+
 def predict_Link(data):
 
     #api porcesa y descarga informacion del link (tweets de el ultimo mes del usuario)
@@ -84,8 +84,10 @@ def obtener_datos_desde_api(link):
     df['tweets_preprocessed'] = processed_tweets
     df = df.drop_duplicates()
     df.fillna('', inplace=True)
-    #vectorizer = TfidfVectorizer(ngram_range=(1, 3), max_features=10000)
-    #text = vectorizer.fit_transform(df['tweets_preprocessed'])
-    #loaded_model = joblib.load('modelo_entrenado.pkl')
-    #prediccion = loaded_model.predict(text)
-    return df['tweets_preprocessed']
+    vectorizer = joblib.load('vectorizador_entrenado.pkl')
+    text = vectorizer.transform(df['tweets_preprocessed'])
+    loaded_mo = joblib.load('modelo_entrenado1.1.pkl')
+    prediccion = loaded_mo.predict(text)
+    porcentaje = float(sum(prediccion == 0)/len(prediccion))
+
+    return porcentaje

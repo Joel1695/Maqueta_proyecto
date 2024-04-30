@@ -111,17 +111,28 @@ def main():
 
     row1 = st.columns(3)
     Celia = row1[1].container()
-    Celia.markdown('<div class="title-text" style="text-align: center;">Celia</div>', unsafe_allow_html=True)
+    Celia.markdown('<div class="title-text" style="text-align:left ; font-family: calibri; font-size: 30px; color: #FFFFFF;">Celia</div>', unsafe_allow_html=True)
+    with Celia:
+        mention(
+        label="Linkedin",
+        icon= "https://cdn-icons-png.flaticon.com/512/174/174857.png",
+        url="https://www.linkedin.com/in/joel-de-andrade-175663152/",
+    )
     joel = row1[2].container()
     joel.markdown('<div class="title-text" style="text-align: center;">Joel</div>', unsafe_allow_html=True)
+    with joel:
+        mention(
+        label="Linkedin",
+        icon= "https://cdn-icons-png.flaticon.com/512/174/174857.png",
+        url="https://www.linkedin.com/in/joel-de-andrade-175663152/",
+    )
     David = row1[0].container()
     David.markdown('<div class="title-text" style="text-align: center;">David</div>', unsafe_allow_html=True)
-    with joel:
-        
+    with David:
         mention(
-        label="Joel de andrade",
+        label="Linkedin",
         icon= "https://cdn-icons-png.flaticon.com/512/174/174857.png",
-        url="https://github.com/Joel1695",
+        url="https://www.linkedin.com/in/joel-de-andrade-175663152/",
     )
     
 
