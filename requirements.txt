@@ -8,3 +8,4 @@ wordcloud
 requests
 pandas
 joblib
+xgboost
