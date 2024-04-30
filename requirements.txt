@@ -7,3 +7,4 @@ tqdm
 wordcloud
 requests
 pandas
+joblib
