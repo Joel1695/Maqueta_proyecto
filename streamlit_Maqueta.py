@@ -14,7 +14,7 @@ def get_img_as_base64(file):
 
 def main():
     img = get_img_as_base64("images2.jpg")
-    img_2 = get_img_as_base64("water.jpg")
+    img_2 = get_img_as_base64("side.jpg")
 
     page_bg_img = f"""
     <style>

@@ -16,7 +16,7 @@ def get_img_as_base64(file):
     return base64.b64encode(data).decode()
 
 
-img_2 = get_img_as_base64("water.jpg")
+img_2 = get_img_as_base64("side.jpg")
 img = get_img_as_base64("image3.jpg")
 
 page_bg_img = f"""
