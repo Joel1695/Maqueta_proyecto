@@ -115,10 +115,12 @@ if st.button("Obtener datos y hacer predicción"):
         if datos is not None:
             # Hacer la predicción con el modelo
             resultado_prediccion = datos
-            
-            # Mostrar el resultado de la predicción
             st.write("Resultado de la predicción:")
-            st.write(f' la probabilidad de que este usuarion puede ser diagnosticado con algun transtorno es de un {resultado_prediccion*100}%')
+            if resultado_prediccion == 1 :
+                st.write(f'segun nuestro modelo esta persona tienen posibilidades de sufrir algun transtorno mental')
+            elif resultado_prediccion == 0:
+                st.write(f'Segun nuestro modelo esta persona no indica tener algun transtorno mental')    
+            
             st.warning("ALERTA!!! sin importar el resultado de la app le recomendamos que si tienen algun duda de si una persona puede o no tener algun desorden mental visite a un profecional para un correcto diagnostico")
         else:
             st.warning("No se pudieron obtener datos de la API")

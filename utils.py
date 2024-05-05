@@ -11,13 +11,15 @@ from unidecode import unidecode
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from tqdm import tqdm
-from wordcloud import WordCloud
-from sklearn.feature_extraction.text import TfidfVectorizer
 import requests
+from sklearn.preprocessing import StandardScaler
 import joblib
-from sklearn.metrics import accuracy_score
-from sklearn.model_selection import train_test_split
-
+import emosent
+from emosent import get_emoji_sentiment_rank_multiple
+from emosent import get_emoji_sentiment_rank
+import emoji
+from scipy.sparse import csr_matrix, hstack
+from afinn import Afinn
 def predict_Link(data):
 
     #api porcesa y descarga informacion del link (tweets de el ultimo mes del usuario)
@@ -50,6 +52,36 @@ def preprocess(text):
   tokens = [lematizador.lemmatize(token) for token in tokens if len(token)>=3]
   return ' '.join(tokens)
 
+def clean_emoji(text):
+    return emoji.replace_emoji(text, replace='')
+
+# Función para contar ocurrencias de las palabras/frases
+first_person_terms = ['I',"i'm", 'me', 'myself', 'my', 'mine', 'to me', 'for me', 'I feel', 'I think', 'I believe', 'I am', ]
+def count_first_person_terms(text):
+    count = 0
+    for term in first_person_terms:
+        count += text.lower().count(term.lower())
+    return count
+# Función para calcular la normalización por longitud del tweet
+def normalize_by_length(text):
+    words = text.split()  # Dividir el texto en palabras
+    return len(words)
+
+def detectar_emojis_completo(tweet):
+    sentiment_score_total = 0  # Iniciar el puntaje total en cero
+
+    # Iterar sobre cada carácter en el tweet
+    for char in tweet:
+        # Verificar si el carácter es un emoji
+        if char in emoji.EMOJI_DATA:  # Usar EMOJI_DATA para verificar si es un emoji
+            # Obtener el valor de sentiment_score del emoji
+            emoji_sentiment_rank = get_emoji_sentiment_rank(char)
+            if emoji_sentiment_rank:
+                sentiment_score = emoji_sentiment_rank['sentiment_score']
+                sentiment_score_total += sentiment_score  # Sumar el puntaje al total
+
+    return sentiment_score_total
+
 
 def obtener_datos_desde_api(link):
     # Dividir la URL por el carácter "/"
@@ -74,20 +106,36 @@ def obtener_datos_desde_api(link):
 
     for tweet in tweets:
       text_only_tweets.append({'text': tweet['text']})
+    tweets = [tweet["text"] for tweet in text_only_tweets]
+    tweets = [tweet.replace('\n', ' ') for tweet in tweets]
+    tweets = ' '.join(tweets)
+    df = pd.DataFrame({"text": tweets},index=[0])
+    df['text'] = df['text'].str.replace(r'@\w+', '', regex=True)  # Elimina menciones
+    df['text'] = df['text'].str.replace(r'#\w+', '', regex=True)  # Elimina hashtags
+    df['text'] = df['text'].str.lower()
+    df['Emojis_Sentimentscore'] = df['text'].apply(detectar_emojis_completo)
+    df['first_person_count'] = df['text'].apply(count_first_person_terms)
+    df['tweet_length'] = df['text'].apply(normalize_by_length)
+    df['egocentrism_score'] = df['first_person_count'] / df['tweet_length']
+    afinn = Afinn()
+    df['clean_tweet'] = df['text'].apply(clean_emoji)
+    df['sentiment_score'] = df['clean_tweet'].apply(afinn.score)
+    df = df[['clean_tweet', 'Emojis_Sentimentscore','egocentrism_score', 'sentiment_score']]
+    #importar el vectorizador y el scalador
+    vectorizer = joblib.load('vectorizador_entrenado_xgb_emotion (1).pkl')
+    x_vec= vectorizer.transform(df['clean_tweet'])
+    # Escala las características de sentimiento
+    sentiment_features = df[['Emojis_Sentimentscore', 'egocentrism_score',
+       'sentiment_score']]
+    scaler = StandardScaler()
+    scaled_sentiment_features = scaler.fit_transform(sentiment_features)
+    scaled_sentiment_features_sparse = csr_matrix(scaled_sentiment_features)
+    # Combinar las características TF-IDF con las características de sentimiento escaladas
+    X_combined = hstack([x_vec, scaled_sentiment_features_sparse])
+    xgb_clf = joblib.load('MODELO_xgb_emotion.pkl')
 
-    df = pd.DataFrame(text_only_tweets)
-    processed_tweets = []
-    for tweet in tqdm(df['text']):
-        processed_tweet = preprocess(tweet)
-        processed_tweets.append(processed_tweet)
-    
-    df['tweets_preprocessed'] = processed_tweets
-    df = df.drop_duplicates()
-    df.fillna('', inplace=True)
-    vectorizer = joblib.load('vectorizador_entrenado.pkl')
-    text = vectorizer.transform(df['tweets_preprocessed'])
-    loaded_mo = joblib.load('modelo_entrenado1.1.pkl')
-    prediccion = loaded_mo.predict(text)
-    porcentaje = float(sum(prediccion == 0)/len(prediccion))
+    predictions = xgb_clf.predict(X_combined)
 
-    return porcentaje
+
+
+    return predictions

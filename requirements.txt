@@ -9,3 +9,6 @@ requests
 pandas
 joblib
 xgboost
+afinn
+emoji
+emosent-py
